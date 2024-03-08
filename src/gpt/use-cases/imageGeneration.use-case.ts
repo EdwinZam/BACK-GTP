@@ -27,9 +27,9 @@ export const imageGenerationUseCase = async(openai: OpenAI, options: Options) =>
     
         //TODO: guardar la imagen en FS.
     
-        const url = await downloadImageAsPng(response.data[0].url);
-    
-        console.log(response)
+        const fileName = await downloadImageAsPng(response.data[0].url);
+        const url = `${process.env.SERVER_URL}/gpt/image-generation/${fileName}`
+        //console.log(response)
     
         return {
             url: url, //TODO: http://localhost:3000/gpt/image-generation/1708100409397.png
@@ -39,27 +39,30 @@ export const imageGenerationUseCase = async(openai: OpenAI, options: Options) =>
 
     }
     ///http://localhost:3000/gpt/image-generation/1708100409397.png
-    const pngImagePath = await downloadImageAsPng(originalImage);
+    const pngImagePath = await downloadImageAsPng(originalImage, true);
 
-    const maskPath = await downloadBase64ImageAsPng(maskImage);
+    const maskPath = await downloadBase64ImageAsPng(maskImage, true);
 
     const response = await openai.images.edit({
         model:'dall-e-2',
         prompt: prompt,
         image: fs.createReadStream(pngImagePath),
-        mask: fs.createReadStream(maskImage),
+        mask: fs.createReadStream(maskPath),
         n: 1,
         size: '1024x1024',
         response_format: 'url',
     });
 
-    const localImagePath = await downloadImageAsPng(response.data[0].url);
-    const fileName = path.basename(localImagePath);
+    const fileName = await downloadImageAsPng(response.data[0].url);
+    const url = `${process.env.SERVER_URL}/gpt/image-generation/${fileName}`
 
-    const pubicUrl= `localhost:3000/${fileName}`
+    // const localImagePath = await downloadImageAsPng(response.data[0].url);
+    // const fileName = path.basename(localImagePath);
+
+    // const pubicUrl= `localhost:3000/${fileName}`
 
     return {
-        url: pubicUrl, //TODO: http://localhost:3000/gpt/image-generation/1708100409397.png
+        url: url, // http://localhost:3000/gpt/image-generation/1708100409397.png
         openAiUrl: response.data[0].url,
         revised_prompt: response.data[0].revised_prompt,
     }

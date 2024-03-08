@@ -12,6 +12,7 @@ export * from './textToAudio.use-case'
 
 export * from './imageGeneration.use-case'
 
+export * from './imageVariation.use-case'
 
 
 
